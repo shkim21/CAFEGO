@@ -5,6 +5,8 @@ from typing import Any, Collection, Optional, Set, Tuple, Type, TypeVar, Union
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db.models.deletion import CASCADE
 from accounts.choices import *
+#from cafe.models import CafeList
+#from cafe.models import CafeList
 #user.username 원래 있는 이름
 class UserManager(BaseUserManager):
     def create_user(self, username, nickname, district, town, agree_terms, agree_marketing,  password=None):
@@ -76,15 +78,14 @@ class User(AbstractBaseUser):
 #방문한 한 카페 정보
 class VisitedCafe(models.Model):
     user = models.ForeignKey(User, on_delete=CASCADE)
+    cafe = models.ForeignKey('cafe.CafeList', on_delete=CASCADE)
     visit_count = models.PositiveIntegerField(default=0)
-    cafe_id = models.PositiveIntegerField(default=0)
+    visit_check = models.BooleanField(default=False)
 
 
 class Badge(models.Model):
     badge_name=models.TextField(max_length=150, unique=True)
     badge_image=models.ImageField()
-    
-    
     cafename = models.CharField(max_length=100)
 
     def __str__(self):
@@ -99,8 +100,8 @@ class Drink(models.Model):
         return self.drinkname
 
 
-class Badge(models.Model):
-    badge_name=models.TextField(max_length=150, unique=True)
-    badge_image=models.ImageField()
+# class Badge(models.Model):
+#     badge_name=models.TextField(max_length=150, unique=True)
+#     badge_image=models.ImageField()
     
     

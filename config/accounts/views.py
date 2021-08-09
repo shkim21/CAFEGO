@@ -16,42 +16,6 @@ from django.contrib import messages
 from django.db.models import Q
 # Create your views here.
 
-def signup(request):
-    if request.method == "POST":
-        if request.POST["password1"] == request.POST["password2"]:
-            user = User.objects.create_user(
-                username=request.POST["username"], password=request.POST["password1"])
-            auth.login(request, user)
-            print("회원가입 성공!")
-            return redirect('/accounts/') #home 페이지 따로 만들어야 댐! url 이름이 home 이어야 댐!
-        return render(request, 'accounts/signup.html')
-    #실패시 안넘어감
-    return render(request, 'accounts/signup.html')
-
-
-
-
-###allauth 써서 필요없을 듯???
-class LoginView(View):
-    def get(self, request):
-        form = forms.LoginForm()
-        ctx = {
-            "form": form,
-        }
-        return render(request, "accounts/login.html", ctx)
-
-    def post(self, request):
-        form = forms.LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get("username")
-            password = form.cleaned_data.get("password")
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return render(request, "accounts/home.html")
-
-        return render(request, "accounts/login.html", {"form": form})
-
 ##allauth 써서 필요 없나??
 @login_required
 def logout(request):
@@ -63,7 +27,6 @@ def main(request):
 
 @login_required
 def home(request):
-    #return render(request, 'accounts/home.html')
     return render(request,'accounts/home.html')
 
 def badge_list(request):
@@ -124,23 +87,33 @@ def enroll_home(request):
 
 class EnrollNewCafeListView(ListView):
     model = CafeList
-    paginate_by = 5
+    paginate_by = 10
     template_name = 'accounts/enroll_new_cafe.html'
     context_object_name = 'new_cafe_list'
+    print("11111111")
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(EnrollNewCafeListView, self).get_context_data(**kwargs)
+    #     context['form'] = forms.VisitedCafeForm()
+    #     return context
 
     #등록기능?
     def enroll_new_cafe(request):
         cafe_list = VisitedCafe.objects.all() #user id 넣어서 그 값만 가져와야 함
+        print("23232323")
+        
         if request.method == 'POST':
             form = forms.VisitedCafeForm(request.POST, request.FILES)
 
             if form.is_valid():
+                print("!!!!!!!!!!!!!!")
                 ##저장
                 cafe = VisitedCafe()
-                cafe.user = form.cleaned_data['user']
-                cafe.cafename = form.cleaned_data['cafename']
-                cafe.visit_count = form.cleaned_data['visit_count']
-                cafe.cafe_id = form.cleaned_data['cafe_id']
+                # cafe.user = form.cleaned_data['user']
+                # cafe.cafe_name = form.cleaned_data['cafename']
+                # cafe.visit_count = form.cleaned_data['visit_count']
+                # cafe.cafe_id = form.cleaned_data['cafe_id']
+                #cafe.visit_check = form.cleaned_data['visit_check']
                 cafe.save()
         else:
             form = forms.VisitedCafeForm()
@@ -149,6 +122,56 @@ class EnrollNewCafeListView(ListView):
             'cafe_list': cafe_list,
             'form': form,
         })
+
+
+
+
+
+
+
+
+
+def enroll_new_cafe2(request):
+    cafe_list = CafeList.objects.all()
+    print("cafelist출력", cafe_list)
+    #cafe_list = VisitedCafe.objects.all() #user id 넣어서 그 값만 가져와야 함
+    #print("222222222")
+    #print("request.method", request.method)
+    
+    if request.method == 'POST':
+        form = forms.NewCafeForm(request.POST, request.FILES)
+        #print("form", form)
+        #print("form.cleaned_data['cafe']", form.cleaned_data['visit_check'])
+        print("form is valid??", form.is_valid)
+        if form.is_valid():
+            print("!!!!!!!!!!!!!!")
+            ##저장
+            visitcafe = VisitedCafe()
+            print("1 visitcafe", visitcafe)
+            visitcafe.user = form.cleaned_data['user']#로그인 한 유저 연결!
+            visitcafe.cafe = form.cleaned_data['cafe']
+            visitcafe.visit_count = form.cleaned_data['visit_count']
+            visitcafe.visit_check = form.cleaned_data['visit_check']
+            visitcafe.save()
+    else:
+        print("here")
+        form = forms.VisitedCafeForm()
+    
+    return render(request, 'accounts/enroll_new_cafe.html', {
+        'cafe_list': cafe_list, #cafe_list
+        'form': form,
+    })
+
+
+
+
+
+
+
+
+
+
+
 
 class EnrollVisitedCafeListView(ListView):
     model = VisitedCafe

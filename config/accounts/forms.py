@@ -1,6 +1,8 @@
+#from CAFEGO.config.cafe.models import CafeList
 from django import forms
 from . import models
 from .models import User, VisitedCafe
+from cafe.models import CafeList
 from allauth.account.forms import SignupForm
 from accounts.choices import *
 
@@ -42,7 +44,28 @@ class MyCustomSignupForm(SignupForm):
         user.save()
         return user
 
+class NewCafeForm(forms.ModelForm):
+    visit_check = forms.BooleanField(label='방문여부 체크')
+
+    def save(self, request):
+        cafe = super(NewCafeForm, self).save(request)
+        cafe.visit_check = self.cleaned_data['visit_check']
+        cafe.save()
+    # def save(self, request):
+    #     user = models.User.objects.get(username)
+    class Meta:
+        model = VisitedCafe
+        fields = ['visit_check']
+
+
 class VisitedCafeForm(forms.ModelForm):
+    class Meta:
+        model = VisitedCafe
+        fields = ['visit_check']
+        #'__all__'
+
+
+class EnrollNewCafeListView(forms.ModelForm):
     class Meta:
         model = VisitedCafe
         fields = '__all__'

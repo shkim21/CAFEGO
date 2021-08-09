@@ -8,6 +8,7 @@
     <h1>새로운 카페를 등록하는 페이지입니다.</h1>
     <p>새로운 카페 등록하기</p>
     <p>방문한 카페를 검색해보세요!</p>
+    <p>현재 로그인한 유저 : {{user.username}}</p>
 
     {% if q %}
     <h5>'{{ q }}' 검색 결과입니다.</h5><br/>
@@ -39,10 +40,17 @@
             {% if new_cafe_list %}
                 {% for cafe in new_cafe_list %}
                     <tr class="text-center">
-                        <td>{{ cafe.id }}</td>
-                        <td><a href="{% url 'cafe:review_list' cafe.id %}">{{ cafe.name }}</a></td>
-                        <td>{{ cafe.address | truncatechars:10  }}</td>
-                        <td>체크박스</td>
+                        <form action="{% url 'enroll_new_cafe2' %}" method="post">
+                            {% csrf_token %}
+                            <td>{{ cafe.id }}</td>
+                            <td><a href="{% url 'cafe:review_list' cafe.id %}" name="cafe">{{ cafe.name }}</a></td>
+                            <td>{{ cafe.address | truncatechars:30  }}</td>
+                            <td>
+                                <!-- <label for="visit_check">방문여부 체크: </label> -->
+                                <input id="visit_check" type="checkbox" name="visit_check">
+                                <input type="submit" value="등록하기">
+                            </td>
+                        </form> 
                     </tr>
                 {% endfor %}
             {% else %}      <!--게시글 쿼리셋이 존재하지 않을 때-->
@@ -93,30 +101,6 @@
         {% endif %}
     </ul>
     {% endif %}
-
-    <!-- 카페 등록 -->
-    <div>
-        유저 : {{cafe.user}}
-        {% for cafe in cafe_list %}
-            <div>    
-                카페명 : {{cafe.cafename}}
-                방문횟수 : {{cafe.visit_count}}
-                카페id : {{cafe.cafe_id}}
-            </div>
-        {% endfor %}
-
-        카페등록하기
-        <form action="" method="post" enctype="multipart/form-data" autocomplete="off">
-            {% csrf_token %}
-
-            <table>
-                {{ form.as_table }}
-            </table>
-            
-            <input type="submit" value="SUBMIT" />
-        </form>        
-    </div>
-
 
     <p>지도 사진</p>
     <p>지도 위에서 태그 표시, 클릭할 수 있게.</p>

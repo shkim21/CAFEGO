@@ -110,7 +110,7 @@ class CafeListView(ListView):
 
 # 카페 지도
 def cafe_map(request):
-    with open('C:/Users/96jos/Desktop/piro/cafe_go/CAFEGO/config/cafe/csv/crawledminor.csv','r', encoding='utf-8') as f:
+    with open('cafe/crawledminor.csv','r', encoding='utf-8') as f:
         dr = csv.DictReader(f)
         s = pd.DataFrame(dr)
     ss = []
