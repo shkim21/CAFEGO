@@ -22,10 +22,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v%sc+=0r)$!637)vebs_x8z!am*tz*=@xylv=!@3us2kjo7=fg'
+import sys
+import json
+ROOT_DIR = os.path.dirname(BASE_DIR)
+SECRETS_PATH = os.path.join(ROOT_DIR, '.config/secrets.json')
+
+# json 파일을 python 객체로 변환
+secrets = json.loads(open(SECRETS_PATH).read())
+
+# json은 dict 자료형으로 변환되므로 .items() 함수를 이용해 key와 value값을 가져온다.
+# 이때 settings 모듈에 동적으로 할당한다.
+for key, value in secrets.items():
+    setattr(sys.modules[__name__], key, value)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -146,6 +157,8 @@ STATICFILES_DIRS = [
     STATIC_DIR,
 ]
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
@@ -163,7 +176,6 @@ AUTHENTICATION_BACKENDS=(
 
 SITE_ID=1
 LOGIN_REDIRECT_URL='/'
-
 
 ACCOUNT_FORMS = {'signup': 'accounts.forms.UserRegistrationForm'} #앱이름.forms.py,클래스 이름
 
@@ -209,3 +221,5 @@ CORS_ALLOW_HEADERS=(
 
 SOCIALACCOUNT_AUTO_SIGNUP=False
 ACCOUNT_EMAIL_REQUIRED = True
+
+ALLOWED_HOSTS = ['*']
