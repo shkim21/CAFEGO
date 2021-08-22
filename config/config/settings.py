@@ -11,29 +11,30 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-import os
+import os, json
+from django.core.exceptions import ImproperlyConfigured
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = os.path.dirname(BASE_DIR)
+secret_file = os.path.join(BASE_DIR, 'secrets.json')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-import sys
-import json
-ROOT_DIR = os.path.dirname(BASE_DIR)
-SECRETS_PATH = os.path.join(ROOT_DIR, '.config/secrets.json')
+with open(secret_file) as f:
+    secrets = json.loads(f.read())
 
-# json 파일을 python 객체로 변환
-secrets = json.loads(open(SECRETS_PATH).read())
+def get_secret(setting, secrets=secrets):
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = "Set the {} environment variable".format(setting)
+        raise ImproperlyConfigured(error_msg)
 
-# json은 dict 자료형으로 변환되므로 .items() 함수를 이용해 key와 value값을 가져온다.
-# 이때 settings 모듈에 동적으로 할당한다.
-for key, value in secrets.items():
-    setattr(sys.modules[__name__], key, value)
+SECRET_KEY = get_secret("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -153,11 +154,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_DIR = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [
-    STATIC_DIR,
-]
+# STATICFILES_DIRS = [
+#     STATIC_DIR,
+# ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -185,8 +187,8 @@ MEDIA_URL = '/media/'
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'pirocafego@gmail.com' #'kgw980316@gmail.com'
-EMAIL_HOST_PASSWORD = 'pirogramming15!' #'parabe1!um'
+EMAIL_HOST_USER = get_secret("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = get_secret("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
 
 CORS_ORIGIN_ALLOW_ALL = True
